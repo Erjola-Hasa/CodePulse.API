@@ -49,6 +49,7 @@ namespace CodePulse.API.Controllers
         [HttpGet]
 
         public async Task<IActionResult> GetallCategory()
+        
         {
             var categories = await _categoryRepository.GetAllAsync();
             //map domain model to dto 
@@ -58,7 +59,7 @@ namespace CodePulse.API.Controllers
                 response.Add(new CategoryDto
                 {
                     Id = category.Id,
-                    Name = category.Name,
+                    Name = category.Name,   
                     UrlHandle = category.UrlHandle,
                 });
 
@@ -66,7 +67,7 @@ namespace CodePulse.API.Controllers
             return Ok(response);
 
 
-
+            
         }
 
         //getById

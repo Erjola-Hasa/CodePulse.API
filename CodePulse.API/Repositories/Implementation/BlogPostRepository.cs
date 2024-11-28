@@ -28,9 +28,17 @@ namespace CodePulse.API.Repositories.Implementation
             return await _dbcontext.blogPosts.ToListAsync();
         }
 
-        public Task<BlogPost> UpdateAsync(BlogPost blogPost)
+        public async Task<BlogPost> UpdateAsync(BlogPost blogPost)
         {
-            throw new NotImplementedException();
+            var existingblogpost = await _dbcontext.blogPosts.FirstOrDefaultAsync(x=>x.Id == blogPost.Id);
+            if (existingblogpost != null)
+            {
+                _dbcontext.Entry(existingblogpost).CurrentValues.SetValues(blogPost);
+               await _dbcontext.SaveChangesAsync(true);
+                return blogPost;
+
+            }
+            return null;
         }
     }
 

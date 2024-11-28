@@ -92,5 +92,47 @@ namespace CodePulse.API.Controllers
 
         }
 
+        [HttpPut]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult>UpdateBlogPost( [FromRoute] Guid id ,UpdateBlogPost updateBlogPost)
+        {
+            //Convert dto to domain
+            var BlogPostDto = new BlogPost
+            {
+                Author = updateBlogPost.Author,
+                ShortDescription = updateBlogPost.ShortDescription,
+                UrlHandle = updateBlogPost.UrlHandle,
+                PublishedDate = updateBlogPost.PublishedDate,
+                Content = updateBlogPost.Content,
+                FeatureImageUrl = updateBlogPost.FeatureImageUrl,
+                IsVisible = updateBlogPost.IsVisible,
+                Title = updateBlogPost.Title,
+
+
+            };
+            BlogPostDto = await _blogPostRepository.UpdateAsync(BlogPostDto);
+
+            if (BlogPostDto == null) 
+            {
+                return NotFound();
+            }
+
+            //Convert domain to dto
+            var responseBlog = new BlogPostDto
+            {
+                Title = BlogPostDto.Title,
+                Author = BlogPostDto.Author,
+                ShortDescription = BlogPostDto.ShortDescription,
+                UrlHandle = BlogPostDto.UrlHandle,
+                IsVisible = BlogPostDto.IsVisible,
+                FeatureImageUrl = BlogPostDto.FeatureImageUrl,
+                Content = BlogPostDto.Content,
+                PublishedDate = BlogPostDto.PublishedDate,
+
+            };
+
+            return Ok(BlogPostDto);
+        }
+
     }
 }
