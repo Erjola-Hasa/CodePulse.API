@@ -1,10 +1,7 @@
 ﻿using CodePulse.API.Models.Domain;
 using CodePulse.API.Models.DTO;
-using CodePulse.API.Repositories.Implementation;
 using CodePulse.API.Repositories.Interface;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography;
 
 namespace CodePulse.API.Controllers
 {
@@ -93,12 +90,13 @@ namespace CodePulse.API.Controllers
         }
 
         [HttpPut]
-        [Route("{id:Guid}")]
-        public async Task<IActionResult>UpdateBlogPost( [FromRoute] Guid id ,UpdateBlogPost updateBlogPost)
+        [Route("{Id:Guid}")]
+        public async Task<IActionResult>UpdateBlogPost([FromRoute] Guid Id ,UpdateBlogPost updateBlogPost)
         {
             //Convert dto to domain
             var BlogPostDto = new BlogPost
             {
+                Id = Id,
                 Author = updateBlogPost.Author,
                 ShortDescription = updateBlogPost.ShortDescription,
                 UrlHandle = updateBlogPost.UrlHandle,
@@ -120,6 +118,7 @@ namespace CodePulse.API.Controllers
             //Convert domain to dto
             var responseBlog = new BlogPostDto
             {
+               
                 Title = BlogPostDto.Title,
                 Author = BlogPostDto.Author,
                 ShortDescription = BlogPostDto.ShortDescription,
@@ -132,6 +131,64 @@ namespace CodePulse.API.Controllers
             };
 
             return Ok(BlogPostDto);
+        }
+
+        [HttpGet]
+        [Route("{Id:Guid}")]
+        public async Task<IActionResult>GetBlogById([FromRoute] Guid Id)
+        {
+            //convert dto to domain
+
+            var response = await _blogPostRepository.GetByIdAsync(Id);
+            if (response == null) 
+            { 
+                return NotFound();
+            }
+            //convert domain to dto 
+            var existingResponse = new BlogPostDto
+            {
+                Id=Id,
+                Author = response.Author,
+                ShortDescription = response.ShortDescription,
+                UrlHandle = response.UrlHandle,
+                Title = response.Title,
+                FeatureImageUrl = response.FeatureImageUrl,
+                Content = response.Content,
+                PublishedDate = response.PublishedDate,
+                IsVisible = response.IsVisible,
+            };
+            
+            return Ok(existingResponse);
+
+
+
+        }
+
+
+        [HttpDelete]
+        [Route("{Id:Guid}")]
+        public async Task<IActionResult> DeleteBlogPost([FromRoute] Guid Id)
+        {
+            var response = await _blogPostRepository.DeleteAsync(Id);
+
+            if(response == null)
+            {
+                return NotFound();
+            }
+            var responseblog = new BlogPostDto
+            {
+                Id=response.Id,
+                Author = response.Author,
+                Title = response.Title,
+                UrlHandle = response.UrlHandle,
+                FeatureImageUrl = response.FeatureImageUrl,
+                Content = response.Content,
+                PublishedDate = response.PublishedDate,
+                IsVisible = response.IsVisible,
+                ShortDescription = response.ShortDescription
+
+            };
+            return Ok(responseblog);
         }
 
     }

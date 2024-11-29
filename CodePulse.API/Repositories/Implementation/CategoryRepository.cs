@@ -28,7 +28,7 @@ namespace CodePulse.API.Repositories.Implementation
             {
                 return null;
             }
-               _dbcontext.categories.Remove(existingCategory);
+             _dbcontext.categories.Remove(existingCategory);
             await _dbcontext.SaveChangesAsync();
             return existingCategory;
         }

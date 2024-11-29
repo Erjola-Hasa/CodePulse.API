@@ -20,7 +20,19 @@ namespace CodePulse.API.Repositories.Implementation
             return blogPost;
         }
 
-     
+        public async Task<BlogPost?> DeleteAsync(Guid Id)
+        {
+           var deleteBlog= await _dbcontext.blogPosts.FirstOrDefaultAsync(x => x.Id == Id);
+            if (deleteBlog == null)
+            {
+                return null;
+            }
+            _dbcontext.blogPosts.Remove(deleteBlog);
+            await _dbcontext.SaveChangesAsync();
+            return deleteBlog;
+                
+
+        }
 
         public async Task<IEnumerable<BlogPost>> GetAllPost()
         {
@@ -28,7 +40,12 @@ namespace CodePulse.API.Repositories.Implementation
             return await _dbcontext.blogPosts.ToListAsync();
         }
 
-        public async Task<BlogPost> UpdateAsync(BlogPost blogPost)
+        public async Task<BlogPost?> GetByIdAsync(Guid id)
+        {
+           return await _dbcontext.blogPosts.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<BlogPost?> UpdateAsync(BlogPost blogPost)
         {
             var existingblogpost = await _dbcontext.blogPosts.FirstOrDefaultAsync(x=>x.Id == blogPost.Id);
             if (existingblogpost != null)
