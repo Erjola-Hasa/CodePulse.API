@@ -15,10 +15,12 @@ namespace CodePulse.API.Controllers
     {
 
         private readonly IBlogPostRepository _blogPostRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public BlogController(IBlogPostRepository blogPostRepository)
+        public BlogController(IBlogPostRepository blogPostRepository,ICategoryRepository categoryRepository)
         {
             _blogPostRepository = blogPostRepository;
+            _categoryRepository = categoryRepository;
         }
 
 
@@ -29,10 +31,10 @@ namespace CodePulse.API.Controllers
         {
 
             //convert dto to domain
-           
+
             var blogpostdomain = new BlogPost
             {
-               
+
                 Title = blogpost.Title,
                 ShortDescription = blogpost.ShortDescription,
                 UrlHandle = blogpost.UrlHandle,
@@ -40,15 +42,26 @@ namespace CodePulse.API.Controllers
                 Content = blogpost.Content,
                 FeatureImageUrl = blogpost.FeatureImageUrl,
                 Author = blogpost.Author,
-                IsVisible = blogpost.IsVisible
-
+                IsVisible = blogpost.IsVisible,
+                Categories = new List<Category>()
 
             };
+            foreach(var categoryId in blogpost.Categories)
+            {
+                var existingCategory = await _categoryRepository.GetByIdAsync(categoryId);
+                if (existingCategory != null) 
+                {
+                    blogpostdomain.Categories.Add(existingCategory);
+                }
+
+
+            }
         blogpostdomain =  await _blogPostRepository.CreateAsync(blogpostdomain);
 
             //map domain to dto 
             var response = new BlogPostDto
             {
+                Id=blogpostdomain.Id,
                 Title = blogpostdomain.Title,
                 ShortDescription = blogpostdomain.ShortDescription,
                 UrlHandle = blogpostdomain.UrlHandle,
@@ -56,7 +69,13 @@ namespace CodePulse.API.Controllers
                 Content = blogpostdomain.Content,
                 FeatureImageUrl = blogpostdomain.FeatureImageUrl,
                 Author = blogpostdomain.Author,
-                IsVisible = blogpostdomain.IsVisible
+                IsVisible = blogpostdomain.IsVisible,
+                Categories=blogpostdomain.Categories.Select(x=> new CategoryDto
+                {
+                    Id= x.Id,
+                    Name= x.Name,
+                    UrlHandle= x.UrlHandle
+                }).ToList()
             };
             return Ok(response);
         }
@@ -80,7 +99,14 @@ namespace CodePulse.API.Controllers
                     Content = blogpost.Content,
                     FeatureImageUrl = blogpost.FeatureImageUrl,
                     Author = blogpost.Author,
-                    IsVisible = blogpost.IsVisible
+                    IsVisible = blogpost.IsVisible,
+                    Categories = blogpost.Categories.Select(x=> new CategoryDto 
+                    { 
+                        Id= x.Id,
+                        Name= x.Name,
+                        UrlHandle= x.UrlHandle, 
+                        
+                    }).ToList()
 
                 });
 
@@ -105,10 +131,20 @@ namespace CodePulse.API.Controllers
                 FeatureImageUrl = updateBlogPost.FeatureImageUrl,
                 IsVisible = updateBlogPost.IsVisible,
                 Title = updateBlogPost.Title,
+                Categories = new List<Category>()
 
 
             };
-            BlogPostDto = await _blogPostRepository.UpdateAsync(BlogPostDto);
+            foreach (var categoryId in updateBlogPost.Categories)
+            {
+                var existingCategory = await _categoryRepository.GetByIdAsync(categoryId);
+                if(existingCategory != null)
+                {
+                    BlogPostDto.Categories.Add(existingCategory);
+                }
+            }
+            
+                BlogPostDto = await _blogPostRepository.UpdateAsync(BlogPostDto);
 
             if (BlogPostDto == null) 
             {
@@ -118,7 +154,7 @@ namespace CodePulse.API.Controllers
             //Convert domain to dto
             var responseBlog = new BlogPostDto
             {
-               
+
                 Title = BlogPostDto.Title,
                 Author = BlogPostDto.Author,
                 ShortDescription = BlogPostDto.ShortDescription,
@@ -127,8 +163,16 @@ namespace CodePulse.API.Controllers
                 FeatureImageUrl = BlogPostDto.FeatureImageUrl,
                 Content = BlogPostDto.Content,
                 PublishedDate = BlogPostDto.PublishedDate,
+                Categories = BlogPostDto.Categories.Select(x=> new CategoryDto
+                {
+                    Id= x.Id,
+                    Name = x.Name,
+                    UrlHandle= x.UrlHandle,
+                    
+                }).ToList()
 
             };
+           
 
             return Ok(BlogPostDto);
         }

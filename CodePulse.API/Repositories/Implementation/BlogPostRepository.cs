@@ -37,7 +37,7 @@ namespace CodePulse.API.Repositories.Implementation
         public async Task<IEnumerable<BlogPost>> GetAllPost()
         {
 
-            return await _dbcontext.blogPosts.ToListAsync();
+            return await _dbcontext.blogPosts.Include(x=>x.Categories).ToListAsync();
         }
 
         public async Task<BlogPost?> GetByIdAsync(Guid id)
@@ -47,7 +47,7 @@ namespace CodePulse.API.Repositories.Implementation
 
         public async Task<BlogPost?> UpdateAsync(BlogPost blogPost)
         {
-            var existingblogpost = await _dbcontext.blogPosts.FirstOrDefaultAsync(x=>x.Id == blogPost.Id);
+            var existingblogpost = await _dbcontext.blogPosts.Include(x=>x.Categories).FirstOrDefaultAsync(x=>x.Id == blogPost.Id);
             if (existingblogpost != null)
             {
                 _dbcontext.Entry(existingblogpost).CurrentValues.SetValues(blogPost);
